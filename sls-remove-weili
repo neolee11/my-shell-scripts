@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+sls remove --stage=weili
+echo "DONE"

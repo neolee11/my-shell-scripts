@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+# need to be in the service app folder
+# sls invoke local -f processDynamoStreamEvent --path ~/lambdaTests/students-service/processDynamoStreamEvent/testData.json --contextPath ~/lambdaTests/students-service/processDynamoStreamEvent/contextData.json  --stage=weili
+
+if [ -z $3 ]; then
+  env=weili;
+else 
+  env=$3;
+fi
+
+cmd="sls invoke local -f $2 --path ~/lambdaTests/$1/$2/testData.json --contextPath ~/lambdaTests/$1/$2/contextData.json --stage=$env"
+echo $cmd
+#sls invoke local -f $2 --path ~/lambdaTests/$1/$2/testData.json --contextPath ~/lambdaTests/$1/$2/contextData.json --stage=$env
+eval $cmd

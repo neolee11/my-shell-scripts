@@ -1,0 +1,4 @@
+# Skip pre-commit hook
+git commit -m "message" --no-verify
+
+aws s3 sync s3://stg-data-dictionary-service-data-files s3://int-data-dictionary-service-data-files

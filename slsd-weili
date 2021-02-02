@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+sls deploy --stage=weili
+echo "DONE"

@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+npm test --testConfigFile=dev.yaml
+echo "DONE"

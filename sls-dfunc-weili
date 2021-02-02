@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+sls deploy function -f getAcademicYears --stage=weili
+echo "DONE"

@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+aws $1 create-tags --resources $2 --tags Key=cb_program,Value=iso Key=engineer,Value=jwarren Key=env_intent,Value=prototype Key=asset_id,Value=$3 Key=system_id,Value=$3
+echo "DONE"

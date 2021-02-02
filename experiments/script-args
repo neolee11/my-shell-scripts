@@ -1,0 +1,11 @@
+#!/bin/bash
+
+terminal_echo()
+{
+  # echo "echo arg0 $0"
+  echo "$1 $2 $3"
+  echo $3
+}
+
+terminal_echo $1 $2 $3
+echo $3 
