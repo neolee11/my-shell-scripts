@@ -1,0 +1,119 @@
+#! /bin/bash
+
+lowerHrlimit=0 # inclusive
+upperHrLimit=24 # exclusive
+minIncrement=30
+
+todayDate="2022-11-03"
+outputFolder="./output_files/${todayDate}"
+reducedFolder="$outputFolder/reduced"
+combinedFolder="$outputFolder/combined"
+combineHrs=1 #Hours. Default is one hour per combined file
+
+reduceLogs() {
+    echo "Start Reducing Logs....."
+
+    echo "Create reduce folder - $reducedFolder"
+
+    mkdir "$reducedFolder"
+
+    for ((i=$lowerHrlimit;i<$upperHrLimit;i++));  do
+        
+        for ((j=0;j<60;j++)); do
+            if [ $((j % $minIncrement)) -eq 0 ]; then
+
+                outputFile="${i}_${j}.json"
+                outputPath="$outputFolder/$outputFile"
+                reducedFilePath=$reducedFolder/reduced_${outputFile}
+
+                echo "reducing file - [ $outputPath ] to [ $reducedFilePath ] "
+                jq '.[] | { textPayload }' $outputPath  | jq -s . > "$reducedFilePath"
+
+                originalFileObjCount=$(jq length $outputPath)
+                reducedFileObjCount=$(jq length $reducedFilePath)
+                if [ $originalFileObjCount -ne $reducedFileObjCount ]; then
+                    echo "!!!!!!!! Reducing job error...."
+                    echo "originalFileObjCount: $originalFileObjCount"
+                    echo "reducedFileObjCount: $reducedFileObjCount"
+                fi
+                
+            fi
+        done
+    done
+
+    echo "Finish Reducing Logs....."     
+}
+
+combineLogs() {
+    echo "Start Combining Logs....."
+
+    echo "Create combine folder - $combinedFolder"
+    mkdir "$combinedFolder"
+
+    groupCut=$((lowerHrLimit + combineHrs))
+    # echo $groupCut
+    myFiles=""
+
+    for ((i=$lowerHrlimit;i<$upperHrLimit;i++));  do
+
+        # echo $i
+
+        command="ls $reducedFolder/reduced_${i}_*"
+        # echo $command
+        myFiles="${myFiles} $(eval $command)"
+
+        if [ $((groupCut - i)) -eq 1 ] || [ $((upperHrLimit - i)) -eq 1 ]; then
+            groupCut=$(( groupCut + combineHrs ))
+
+            # echo $myFiles
+            combinedFileName="combined_$i.json"
+            combinedFilePath="$combinedFolder/$combinedFileName"
+
+            echo "Combining files to $combinedFilePath"
+
+            jq -s '.[0]=([.[]]|flatten)|.[0]' $myFiles > $combinedFilePath
+
+            indiTotal=0
+
+            for f in $myFiles;
+            do
+                curr="$(jq length $f)"
+                indiTotal=$(( indiTotal + curr ))
+            done 
+
+            # echo "Individual Files Object Count"
+            # echo $indiTotal
+
+            # echo "Combined File Object Count"
+            # jq length $combinedFilePath
+
+             if [ $indiTotal -ne $indiTotal ]; then
+                    echo "!!!!!!!! Combining job error...."
+                    echo "individual file object total count: $indiTotal"
+                    echo "combined file object total count: $indiTotal"
+            fi
+
+            myFiles=""
+            echo '+++++++++++++++'
+        fi
+    done
+
+    echo "Finish Combining Logs....."     
+}
+
+# jq '.[] | { textPayload }' 0_0.json  | jq -s . > output.json
+
+# jq -s '.[0]=([.[]]|flatten)|.[0]' *.json > combine.json
+
+scriptStartTime=$(eval date +"%T")
+echo "Script Start time: $scriptStartTime"
+echo ""
+
+# reduceLogs 0
+combineLogs 0
+
+echo ""
+echo ""
+
+scriptEndTime=$(eval date +"%T")
+echo "Script End time: $scriptEndTime"                                                                                                                                              

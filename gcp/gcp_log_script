@@ -1,0 +1,84 @@
+#! /bin/bash
+
+# gcloud logging read 'timestamp>="2022-10-31T23:00:00Z" AND timestamp<="2022-10-31T23:00:10Z" AND resource.labels.container_name=mda-2c-uat-api' --format='json'  > outputjson
+
+scriptStartTime=$(eval date +"%T")
+echo "Script Start time: $scriptStartTime"
+echo ""
+
+
+
+
+# current SZ time -8 => GMT on GCP
+
+# inclusive
+lowerHrLimist=0
+# exclusive
+upperHrLimit=24
+minIncrement=30
+
+todayDate="2022-11-06"
+outputFolder="./output_files/${todayDate}"
+
+mkdir $outputFolder
+
+# startTime="${todayDate}T1:0:00Z"
+# endTime="${todayDate}T1:9:00Z"
+
+# mainQuery="resource.labels.container_name=mda-2c-uat-api"
+
+mainQuery="textPayload:\"[mik-helper-utils]\" AND textPayload:\"Api-Key\" AND -textPayload:\"\\\"Api-Key\\\":\\\"\\\"\""
+         # textPayload:"[mik-helper-utils]" AND textPayload:"Api-Key" AND -textPayload:"\"Api-Key\":\"\"" 
+        
+# command="gcloud logging read 'timestamp>=\"$startTime\" AND timestamp<\"$endTime\" AND $mainQuery' --format='json' > $outputPath"
+
+# eval $command
+
+# echo "DONE - Total logs downloaded:"
+
+# eval "jq length $outputPath" 
+
+
+
+getLogs() {      
+    for ((i=$lowerHrLimist;i<$upperHrLimit;i++));  do
+        
+        for ((j=0;j<60;j++)); do
+            if [ $((j % $minIncrement)) -eq 0 ]; then
+
+                endMin=$((j + minIncrement))
+                startTime="${todayDate}T${i}:${j}:00Z"
+                endTime="${todayDate}T${i}:${endMin}:00Z"
+
+                if [ $endMin -eq 60 ]; then 
+                    endTime="${todayDate}T${i}:59:59Z"
+                fi
+
+                # echo $startTime $endTime   
+
+                outputFile="${i}_${j}.json"
+                outputPath="$outputFolder/$outputFile"
+
+                echo "***** Start downloading.... TIME FROM [$startTime] TO [$endTime] *****"
+                command="gcloud logging read 'timestamp>=\"$startTime\" AND timestamp<\"$endTime\" AND $mainQuery' --format='json' > $outputPath"
+
+                # echo $command  
+                echo "Output to $outputPath"
+
+                eval $command
+
+                countLogs=$(eval jq length "$outputPath")
+
+                echo "***** Finish downloading Logs: $countLogs *****"
+                echo ""
+            fi
+        done
+    done     
+
+    echo "++++++++ DONE ++++++++"        
+    scriptEndTime=$(eval date +"%T")
+    echo "Script End time: $scriptEndTime"                                                                                                                                              
+                                                                                                                                                   
+}   
+
+getLogs 0
