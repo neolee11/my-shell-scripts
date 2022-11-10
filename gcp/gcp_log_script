@@ -6,40 +6,24 @@ scriptStartTime=$(eval date +"%T")
 echo "Script Start time: $scriptStartTime"
 echo ""
 
-
-
+# BEGIN OF VARIABLES
 
 # current SZ time -8 => GMT on GCP
-
-# inclusive
-lowerHrLimist=0
-# exclusive
-upperHrLimit=24
+todayDate="2022-11-09"
+lowerHrLimist=0 # inclusive
+upperHrLimit=24 # exclusive
 minIncrement=30
 
-todayDate="2022-11-06"
-outputFolder="./output_files/${todayDate}"
+# END OF VARIABLES
+
+rootFolder="/Users/weilili/Development/Michaels/gcp"
+outputFolder="${rootFolder}/output_files/${todayDate}"
 
 mkdir $outputFolder
-
-# startTime="${todayDate}T1:0:00Z"
-# endTime="${todayDate}T1:9:00Z"
-
-# mainQuery="resource.labels.container_name=mda-2c-uat-api"
 
 mainQuery="textPayload:\"[mik-helper-utils]\" AND textPayload:\"Api-Key\" AND -textPayload:\"\\\"Api-Key\\\":\\\"\\\"\""
          # textPayload:"[mik-helper-utils]" AND textPayload:"Api-Key" AND -textPayload:"\"Api-Key\":\"\"" 
         
-# command="gcloud logging read 'timestamp>=\"$startTime\" AND timestamp<\"$endTime\" AND $mainQuery' --format='json' > $outputPath"
-
-# eval $command
-
-# echo "DONE - Total logs downloaded:"
-
-# eval "jq length $outputPath" 
-
-
-
 getLogs() {      
     for ((i=$lowerHrLimist;i<$upperHrLimit;i++));  do
         

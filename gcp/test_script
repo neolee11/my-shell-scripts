@@ -1,0 +1,13 @@
+#! /bin/bash
+
+todayDate="2022-11-06"
+
+rootFolder="/Users/weilili/Development/Michaels/gcp"
+outputFolder="${rootFolder}/output_files/${todayDate}"
+reducedFolder="$outputFolder/reduced"
+combinedFolder="$outputFolder/combined"
+
+
+echo "Create reduce folder - $reducedFolder"
+
+mkdir $reducedFolder

@@ -1,13 +1,21 @@
 #! /bin/bash
 
+# BEGIN OF VARIABLES
+
+todayDate="2022-11-09"
 lowerHrlimit=0 # inclusive
 upperHrLimit=24 # exclusive
 minIncrement=30
 
-todayDate="2022-11-03"
-outputFolder="./output_files/${todayDate}"
+# END OF VARIABLES
+
+localRootFolder="/Users/weilili/Development/Michaels/gcp"
+outputFolder="${localRootFolder}/output_files/${todayDate}"
 reducedFolder="$outputFolder/reduced"
-combinedFolder="$outputFolder/combined"
+
+oneDriveRoot="/Users/weilili/OneDrive - Michaels/api-error-report"
+combinedFolder="$oneDriveRoot/${todayDate}"
+
 combineHrs=1 #Hours. Default is one hour per combined file
 
 reduceLogs() {
@@ -15,7 +23,7 @@ reduceLogs() {
 
     echo "Create reduce folder - $reducedFolder"
 
-    mkdir "$reducedFolder"
+    mkdir $reducedFolder
 
     for ((i=$lowerHrlimit;i<$upperHrLimit;i++));  do
         
@@ -65,14 +73,6 @@ combineLogs() {
         if [ $((groupCut - i)) -eq 1 ] || [ $((upperHrLimit - i)) -eq 1 ]; then
             groupCut=$(( groupCut + combineHrs ))
 
-            # echo $myFiles
-            combinedFileName="combined_$i.json"
-            combinedFilePath="$combinedFolder/$combinedFileName"
-
-            echo "Combining files to $combinedFilePath"
-
-            jq -s '.[0]=([.[]]|flatten)|.[0]' $myFiles > $combinedFilePath
-
             indiTotal=0
 
             for f in $myFiles;
@@ -80,6 +80,14 @@ combineLogs() {
                 curr="$(jq length $f)"
                 indiTotal=$(( indiTotal + curr ))
             done 
+
+            # echo $myFiles
+            combinedFileName="${todayDate}_${i}hr_${indiTotal}.json"
+            combinedFilePath="$combinedFolder/$combinedFileName"
+
+            echo "Combining files to $combinedFilePath"
+
+            jq -s '.[0]=([.[]]|flatten)|.[0]' $myFiles > "$combinedFilePath"
 
             # echo "Individual Files Object Count"
             # echo $indiTotal
@@ -109,7 +117,11 @@ scriptStartTime=$(eval date +"%T")
 echo "Script Start time: $scriptStartTime"
 echo ""
 
-# reduceLogs 0
+reduceLogs 0
+
+echo ""
+echo ""
+
 combineLogs 0
 
 echo ""
